@@ -96,8 +96,10 @@ Base functions everything else is built from.
 
 =head3 element
 
-Accepts a tag name and subroutine to generate its components. Returns a
-formatted string of HTML.
+Accepts a tag name and subroutine to generate its components. If called in
+scalar context, returns a formatted string of HTML. When called in void context
+within another call to C<element>, the generated string is appended to the
+parent element.
 
 =head3 class
 
