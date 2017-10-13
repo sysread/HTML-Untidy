@@ -1,148 +1,6 @@
 package HTML::Untidy;
 # ABSTRACT: yet another way to write HTML quickly and programmatically
 
-use strict;
-use warnings;
-use parent 'Exporter';
-use HTML::Escape 'escape_html';
-
-my @BASE = qw(element class attr prop text raw note);
-
-# source: https://developer.mozilla.org/en-US/docs/Web/HTML/Element
-my @TAGS = qw(
-  a abbr address area article aside audio
-  b base bdi bdo blockquote body br button
-  canvas caption cite code col colgroup
-  data datalist dd del details dfn dialog div dl dt
-  em embed
-  fieldset figcaption figure footer form
-  h1 h2 h3 h4 h5 h6 head header hgroup hr html
-  i iframe img input ins
-  kbd
-  label legend li link
-  main map mark menu menuitem meta meter
-  nav noframes noscript
-  object ol optgroup option output
-  p param picture pre progress
-  q
-  rp rt rtc ruby
-  s samp script section select slot small source span strong style sub summary sup
-  table tbody td template textarea tfoot th thead time title tr track
-  u ul
-  var video
-  wbr
-);
-
-my @COMMON = qw(
-  html head body title meta link script style
-  h1 h2 h3 h4 h5 h6
-  div p hr pre nav code img a b i u em strong sup sub small
-  table tbody thead tr th td
-  ul dl ol li dd dt
-  form input textarea select option button label
-  canvas
-);
-
-our @EXPORT_OK = (@BASE, @TAGS);
-
-our %EXPORT_TAGS = (
-  base   => [@BASE],
-  common => [@BASE, @COMMON],
-  all    => [@BASE, @TAGS],
-);
-
-our @CLASS;
-our @ATTR;
-our @PROP;
-our @BODY;
-our $INDENT = 0;
-
-my $DEPTH = 0;
-
-sub install_sub{
-  no strict 'refs';
-  my ($name, $code) = @_;
-  *{"${name}"} = $code;
-}
-
-sub e ($){
-  goto \&escape_html;
-}
-
-sub indent {
-  return ' ' x ($DEPTH * $INDENT);
-}
-
-sub element ($&){
-  my ($tag, $code) = @_;
-
-  my $html = do {
-    local @CLASS;
-    local @ATTR;
-    local @PROP;
-    local @BODY;
-
-    ++$DEPTH;
-    my $inner_html = $code->();
-    --$DEPTH;
-
-    if ($inner_html) {
-      push @BODY, $inner_html;
-    }
-
-    my @attrs;
-    for (my $i = 0; $i < @ATTR; $i += 2) {
-      push @attrs, qq{$ATTR[$i]="$ATTR[$i + 1]"};
-    }
-
-    my $attr  = ''; $attr  = ' ' . join ' ', @attrs if @attrs;
-    my $prop  = ''; $prop  = ' ' . join ' ', @PROP  if @PROP;
-    my $class = ''; $class = sprintf ' class="%s"', join ' ', @CLASS if @CLASS;
-
-    if (@BODY) {
-      my $open  = sprintf '%s<%s%s%s%s>', indent, $tag, $class, $attr, $prop;
-      my $close = sprintf '%s</%s>',      indent, $tag;
-      join("\n", $open, join("\n", @BODY), $close);
-    }
-    else {
-      sprintf q{%s<%s%s%s%s></%s>}, indent, $tag, $class, $attr, $prop, $tag;
-    }
-  };
-
-  my $void = !defined wantarray;
-
-  # At root of tag stack or called in non-void context
-  if ($DEPTH == 0 || !$void) {
-    return $html;
-  }
-  # Inner-tag body call in void context
-  else {
-    push @BODY, $html;
-    return;
-  }
-}
-
-sub class (@){ push @CLASS, map{ e $_ } map{ split /\s+/, $_ } @_; return; }
-sub prop  (@){ push @PROP, map{ e $_ } @_; return; }
-sub text  (@){ push @BODY, map{ indent . e $_ } @_; return; }
-sub raw   (@){ push @BODY, map{ indent . $_ } @_; return; }
-sub note  (@){ push @BODY, map{ indent . '<!-- ' . e($_) . ' -->' } @_; return }
-
-sub attr (@){
-  for (my $i = 0; $i < @_; $i += 2) {
-    push @ATTR, e $_[$i], e $_[$i + 1];
-  }
-
-  return;
-}
-
-foreach my $tag (@TAGS){
-  install_sub($tag, sub(&){ unshift @_, $tag; goto \&element; });
-}
-
-1;
-__DATA__
-
 =head1 NAME
 
 HTML::Untidy
@@ -329,3 +187,146 @@ Jeff Ober <sysread@fastmail.fm>
 =head1 LICENSE
 
 Perl5
+
+=cut
+
+use strict;
+use warnings;
+use parent 'Exporter';
+use HTML::Escape 'escape_html';
+
+my @BASE = qw(element class attr prop text raw note);
+
+# source: https://developer.mozilla.org/en-US/docs/Web/HTML/Element
+my @TAGS = qw(
+  a abbr address area article aside audio
+  b base bdi bdo blockquote body br button
+  canvas caption cite code col colgroup
+  data datalist dd del details dfn dialog div dl dt
+  em embed
+  fieldset figcaption figure footer form
+  h1 h2 h3 h4 h5 h6 head header hgroup hr html
+  i iframe img input ins
+  kbd
+  label legend li link
+  main map mark menu menuitem meta meter
+  nav noframes noscript
+  object ol optgroup option output
+  p param picture pre progress
+  q
+  rp rt rtc ruby
+  s samp script section select slot small source span strong style sub summary sup
+  table tbody td template textarea tfoot th thead time title tr track
+  u ul
+  var video
+  wbr
+);
+
+my @COMMON = qw(
+  html head body title meta link script style
+  h1 h2 h3 h4 h5 h6
+  div p hr pre nav code img a b i u em strong sup sub small
+  table tbody thead tr th td
+  ul dl ol li dd dt
+  form input textarea select option button label
+  canvas
+);
+
+our @EXPORT_OK = (@BASE, @TAGS);
+
+our %EXPORT_TAGS = (
+  base   => [@BASE],
+  common => [@BASE, @COMMON],
+  all    => [@BASE, @TAGS],
+);
+
+our @CLASS;
+our @ATTR;
+our @PROP;
+our @BODY;
+our $INDENT = 0;
+
+my $DEPTH = 0;
+
+sub install_sub{
+  no strict 'refs';
+  my ($name, $code) = @_;
+  *{"${name}"} = $code;
+}
+
+sub e ($){
+  goto \&escape_html;
+}
+
+sub indent {
+  return ' ' x ($DEPTH * $INDENT);
+}
+
+sub element ($&){
+  my ($tag, $code) = @_;
+
+  my $html = do {
+    local @CLASS;
+    local @ATTR;
+    local @PROP;
+    local @BODY;
+
+    ++$DEPTH;
+    my $inner_html = $code->();
+    --$DEPTH;
+
+    if ($inner_html) {
+      push @BODY, $inner_html;
+    }
+
+    my @attrs;
+    for (my $i = 0; $i < @ATTR; $i += 2) {
+      push @attrs, qq{$ATTR[$i]="$ATTR[$i + 1]"};
+    }
+
+    my $attr  = ''; $attr  = ' ' . join ' ', @attrs if @attrs;
+    my $prop  = ''; $prop  = ' ' . join ' ', @PROP  if @PROP;
+    my $class = ''; $class = sprintf ' class="%s"', join ' ', @CLASS if @CLASS;
+
+    if (@BODY) {
+      my $open  = sprintf '%s<%s%s%s%s>', indent, $tag, $class, $attr, $prop;
+      my $close = sprintf '%s</%s>',      indent, $tag;
+      join("\n", $open, join("\n", @BODY), $close);
+    }
+    else {
+      sprintf q{%s<%s%s%s%s></%s>}, indent, $tag, $class, $attr, $prop, $tag;
+    }
+  };
+
+  my $void = !defined wantarray;
+
+  # At root of tag stack or called in non-void context
+  if ($DEPTH == 0 || !$void) {
+    return $html;
+  }
+  # Inner-tag body call in void context
+  else {
+    push @BODY, $html;
+    return;
+  }
+}
+
+sub class (@){ push @CLASS, map{ e $_ } map{ split /\s+/, $_ } @_; return; }
+sub prop  (@){ push @PROP, map{ e $_ } @_; return; }
+sub text  (@){ push @BODY, map{ indent . e $_ } @_; return; }
+sub raw   (@){ push @BODY, map{ indent . $_ } @_; return; }
+sub note  (@){ push @BODY, map{ indent . '<!-- ' . e($_) . ' -->' } @_; return }
+
+sub attr (@){
+  for (my $i = 0; $i < @_; $i += 2) {
+    push @ATTR, e $_[$i], e $_[$i + 1];
+  }
+
+  return;
+}
+
+foreach my $tag (@TAGS){
+  install_sub($tag, sub(&){ unshift @_, $tag; goto \&element; });
+}
+
+1;
