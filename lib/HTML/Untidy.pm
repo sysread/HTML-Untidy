@@ -1,4 +1,5 @@
-package HTML::Primitive;
+package HTML::Untidy;
+# ABSTRACT: yet another way to write HTML quickly and programmatically
 
 use strict;
 use warnings;
@@ -144,17 +145,17 @@ __DATA__
 
 =head1 NAME
 
-HTML::Primitive
+HTML::Untidy
 
 =head1 SYNOPSIS
 
-  use HTML::Primitive;
+  use HTML::Untidy;
 
   sub bootstrap4_modal {
     my ($content, $indent) = @_;
 
     # Set number of spaces to indent
-    local $HTML::Primitive::INDENT = $indent || 0;
+    local $HTML::Untidy::INDENT = $indent || 0;
 
     div {
       class 'modal';
@@ -270,10 +271,10 @@ Adds an HTML comment to the body of the tag.
 
 =head3 indentation
 
-If you want indentation, set C<$HTML::Primitive::INDENT> to the number of
+If you want indentation, set C<$HTML::Untidy::INDENT> to the number of
 spaces you want per level.
 
-  local $HTML::Primitive::INDENT = 2;
+  local $HTML::Untidy::INDENT = 2;
   
   element 'div', sub{
     element 'button', sub{

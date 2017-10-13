@@ -1,78 +1,78 @@
-use Test2::Bundle::Extended '!meta', '!prop';
-use HTML::Primitive ':common';
+use Test2::Bundle::Extended '!meta', '!prop', '!note';
+use HTML::Untidy ':common';
 
 subtest 'text' => sub{
   do {
-    local @HTML::Primitive::BODY;
+    local @HTML::Untidy::BODY;
     is text('foo'), U, 'returns undef';
     is text('bar', 'baz', 'bat'), U, 'returns undef';
-    is \@HTML::Primitive::BODY, ['foo', 'bar', 'baz', 'bat'], 'fragments pushed onto @BODY';
+    is \@HTML::Untidy::BODY, ['foo', 'bar', 'baz', 'bat'], 'fragments pushed onto @BODY';
   };
 
   do {
-    local @HTML::Primitive::BODY;
+    local @HTML::Untidy::BODY;
     is text(qw(< > &)), U, 'returns undef';
-    is \@HTML::Primitive::BODY, [qw(&lt; &gt; &amp;)], 'fragments properly escaped';
+    is \@HTML::Untidy::BODY, [qw(&lt; &gt; &amp;)], 'fragments properly escaped';
   };
 };
 
 subtest 'raw' => sub{
   do {
-    local @HTML::Primitive::BODY;
+    local @HTML::Untidy::BODY;
     is raw('foo'), U, 'returns undef';
     is raw('bar', 'baz', 'bat'), U, 'returns undef';
-    is \@HTML::Primitive::BODY, ['foo', 'bar', 'baz', 'bat'], 'fragments pushed onto @BODY';
+    is \@HTML::Untidy::BODY, ['foo', 'bar', 'baz', 'bat'], 'fragments pushed onto @BODY';
   };
 
   do {
-    local @HTML::Primitive::BODY;
+    local @HTML::Untidy::BODY;
     is raw(qw(< > &)), U, 'returns undef';
-    is \@HTML::Primitive::BODY, [qw(< > &)], 'fragments are not escaped';
+    is \@HTML::Untidy::BODY, [qw(< > &)], 'fragments are not escaped';
   };
 };
 
 subtest 'note' => sub{
   do {
-    local @HTML::Primitive::BODY;
+    local @HTML::Untidy::BODY;
     is note('foo'), U, 'returns undef';
     is note('bar', 'baz', 'bat'), U, 'returns undef';
-    is \@HTML::Primitive::BODY, ['<!-- foo -->', '<!-- bar -->', '<!-- baz -->', '<!-- bat -->'], 'fragments pushed onto @BODY';
+    is \@HTML::Untidy::BODY, ['<!-- foo -->', '<!-- bar -->', '<!-- baz -->', '<!-- bat -->'], 'fragments pushed onto @BODY';
   };
 
   do {
-    local @HTML::Primitive::BODY;
+    local @HTML::Untidy::BODY;
     is note(qw(< > &)), U, 'returns undef';
-    is \@HTML::Primitive::BODY, ['<!-- &lt; -->', '<!-- &gt; -->', '<!-- &amp; -->'], 'fragments properly escaped';
+    is \@HTML::Untidy::BODY, ['<!-- &lt; -->', '<!-- &gt; -->', '<!-- &amp; -->'], 'fragments properly escaped';
   };
 };
 
 subtest 'class' => sub{
   do {
-    local @HTML::Primitive::CLASS;
+    local @HTML::Untidy::CLASS;
     is class('foo bar'), U, 'returns undef';
     is class('baz', 'bat'), U, 'returns undef';
-    is \@HTML::Primitive::CLASS, [qw(foo bar baz bat)], 'classes added to %CLASS';
+    is \@HTML::Untidy::CLASS, [qw(foo bar baz bat)], 'classes added to %CLASS';
   };
 
   do {
-    local @HTML::Primitive::CLASS;
+    local @HTML::Untidy::CLASS;
     is class(qw(< > &)), U, 'returns undef';
-    is \@HTML::Primitive::CLASS, [qw(&lt; &gt; &amp;)], 'classes properly escaped';
+    is \@HTML::Untidy::CLASS, [qw(&lt; &gt; &amp;)], 'classes properly escaped';
   };
 };
 
 subtest 'prop' => sub{
   do {
-    local @HTML::Primitive::PROP;
+    local @HTML::Untidy::PROP;
     is prop('foo'), U, 'returns undef';
     is prop('bar', 'baz', 'bat'), U, 'returns undef';
-    is \@HTML::Primitive::PROP, ['foo', 'bar', 'baz', 'bat'], 'fragments pushed onto @PROP';
+    is \@HTML::Untidy::PROP, ['foo', 'bar', 'baz', 'bat'], 'fragments pushed onto @PROP';
   };
 
   do {
-    local @HTML::Primitive::PROP;
+    local @HTML::Untidy::PROP;
     is prop(qw(< > &)), U, 'returns undef';
-    is \@HTML::Primitive::PROP, ['&lt;', '&gt;', '&amp;'], 'fragments properly escaped';
+    is \@HTML::Untidy::PROP, ['&lt;', '&gt;', '&amp;'], 'fragments properly escaped';
   };
 };
 
@@ -82,7 +82,7 @@ subtest 'element' => sub{
   is div {p {text 'para 1'}; p {text 'para 2'}}, "<div>\n<p>\npara 1\n</p>\n<p>\npara 2\n</p>\n</div>", 'multiple children';
 
   do {
-    local $HTML::Primitive::INDENT = 2;
+    local $HTML::Untidy::INDENT = 2;
 
     my $html = html {
       head {
