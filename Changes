@@ -1,3 +1,5 @@
 {{$NEXT}}
+-adds Dist::Zilla::Plugin::MetaJSON (thanks manwar)
 
 0.01 2017-10-13
+-Initial release
